@@ -3,3 +3,4 @@ vendor/
 .env
 *.docx
 *.pdf
+.php-cs-fixer.cache
