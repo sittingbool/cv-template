@@ -1,5 +1,6 @@
 <?php
-
+header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Headers: *");
 // Should be set to 0 in production
 error_reporting(E_ALL);
 

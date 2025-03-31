@@ -13,7 +13,8 @@
         "nyholm/psr7-server": "^1.1",
         "php-di/php-di": "^7.0",
         "phpoffice/phpword": "^1.2",
-        "dompdf/dompdf": "^3.0"
+        "dompdf/dompdf": "^3.0",
+        "ext-intl": "*"
     },
     "require-dev": {
         "vimeo/psalm": "^5.24",

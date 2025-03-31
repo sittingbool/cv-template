@@ -1,12 +1,13 @@
 <?php
 
-namespace App\Action;
+namespace App\Document;
 
-use Psr\Http\Message\ResponseInterface as Response;
-use Psr\Http\Message\ServerRequestInterface as Request;
+use Exception;
 use PhpOffice\PhpWord\IOFactory;
 use PhpOffice\PhpWord\Settings;
 use PhpOffice\PhpWord\TemplateProcessor;
+use Psr\Http\Message\ResponseInterface as Response;
+use Psr\Http\Message\ServerRequestInterface as Request;
 
 final class DocumentAction
 {
@@ -21,18 +22,12 @@ final class DocumentAction
 
     public function __invoke(Request $request, Response $response): Response
     {
-        $list = ['one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight'];
+        $json = $request->getParsedBody();
+        $application = new ApplicationModel($json);
         try {
             $templateProcessor = new TemplateProcessor($this->templateName);
-            $templateProcessor->setValue('firstname', 'Richard');
-            $templateProcessor->setValue('lastname', 'Habermann');
-
-            $replacements = [];
-            for($i = 0; $i < count($list); $i++) {
-                $replacements[] = array('item' => $list[$i]);
-            }
-            $templateProcessor->cloneBlock('block', 0, true, false, $replacements);
-
+            $this->assignApplicant($templateProcessor, $application->applicant);
+            $this->assignPositions($templateProcessor, $application);
 
             $templateProcessor->saveAs($this->documentName);
 
@@ -51,6 +46,25 @@ final class DocumentAction
         }
 
         return $response->withHeader('Content-Type', 'application/json');
+    }
+
+    /**
+     * @throws Exception - if the language key cannot be found on the processed property
+     */
+    protected function assignApplicant(TemplateProcessor $templateProcessor, ApplicantModel $applicant): void
+    {
+        $applicant->assignToTemplateProcessor($templateProcessor, 'skills');
+        $skill_replacements = array_map(fn ($item): array => $item->getDisplayJSON(), $applicant->skills);
+        $templateProcessor->cloneBlock('list_skills', 0, true, false, $skill_replacements);
+    }
+
+    /**
+     * @throws Exception - if the language key cannot be found on the processed property
+     */
+    protected function assignPositions(TemplateProcessor $templateProcessor, ApplicationModel $application): void
+    {
+        $position_replacements = array_map(fn (PositionModel $item): array => $item->getDisplayJSON(), $application->positions);
+        $templateProcessor->cloneBlock('list_positions', 0, true, false, $position_replacements);
     }
 
     /**
