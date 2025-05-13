@@ -8,7 +8,9 @@ class SkillModel extends BaseJSONModel
 
     public function __construct(array $json, string $lang = 'de')
     {
-        $json['years'] = $json['years'] . ' ' . ($lang == 'de' ? 'Jahre' : 'years');
+        $current_year = intval(date('Y'));
+        $json['years'] = ($current_year - $json['since']) . ' ' . ($lang == 'de' ? 'Jahre' : 'years');
+        unset($json['since']);
         parent::__construct($json, $lang);
     }
 }

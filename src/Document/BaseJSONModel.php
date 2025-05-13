@@ -11,11 +11,13 @@ class BaseJSONModel
     protected string $_templatePrefix = '';
     protected array $json;
     protected string $lang = 'de';
+    protected array $i18nTexts;
 
     public function __construct(array $json, string $lang = 'de')
     {
         $this->json = $json;
         $this->lang = $lang;
+        $this->i18nTexts = $_ENV['i18n'][$lang];
     }
 
     /**
