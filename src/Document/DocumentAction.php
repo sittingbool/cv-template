@@ -17,8 +17,8 @@ final class DocumentAction
 
     public function __construct()
     {
-        $this->templateName = __DIR__ . '/../../files/CV_template.docx';
-        $this->documentName = __DIR__ . '/../../files/CV_de.docx';
+        $this->templateName = realpath(__DIR__ . '/../../files/CV_template.docx');
+        $this->documentName = realpath(__DIR__ . '/../../files/CV_de.docx');
         $i18nDeText = file_get_contents(__DIR__ . '/../../files/i18n/de.json');
         $i18nEnText = file_get_contents(__DIR__ . '/../../files/i18n/en.json');
         $this->i18nDefault = [
@@ -163,13 +163,7 @@ final class DocumentAction
      */
     protected function makePDF(string $filename): string
     {
-        $pdfName = str_replace('.docx', '.pdf', $filename);
-        Settings::setPdfRendererName(Settings::PDF_RENDERER_DOMPDF);
-        // Any writable directory here. It will be ignored.
-        Settings::setPdfRendererPath('.');
-
-        $phpWord = IOFactory::load($filename);
-        $phpWord->save($pdfName, 'PDF');
-        return $pdfName;
+        exec('osascript /Users/richardhabermann/Developer/sittingbool/cv-template/word_to_pdf.scpt ' . $filename);
+        return $filename;
     }
 }
