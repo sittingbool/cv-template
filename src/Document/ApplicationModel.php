@@ -11,6 +11,7 @@ class ApplicationModel extends BaseJSONModel
     {
         $this->applicant = new ApplicantModel($json['applicant'], $lang);
         unset($json['applicant']);
+        unset($json['_missingSkills']);
         $this->positions = array_map(fn ($item) => new PositionModel($item, $lang), $json['formerPositions']);
         unset($json['formerPositions']);
         $json['applicationDate'] = $this->getFormattedDate($json['applicationDate'], $lang);

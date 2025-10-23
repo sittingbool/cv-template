@@ -33,7 +33,14 @@ final class DocumentAction
         $application = new ApplicationModel($json);
         $fileTitle = preg_replace('/[^a-zA-Z0-9]+/', '_', $application->title);
         $this->documentName = str_replace('de', $fileTitle, $this->documentName);
+        $outputPath = __DIR__ . '/../../output/' . basename($this->documentName);
         try {
+
+            // Ensure output directory exists
+            $outputDir = dirname($outputPath);
+            if (!is_dir($outputDir)) {
+                mkdir($outputDir, 0755, true);
+            }
             $templateProcessor = new TemplateProcessor($this->templateName);
             foreach ($this->i18nDefault['de'] as $key => $value) { // FIXME: hard coded language
                 $templateProcessor->setValue($key, $value);
@@ -45,14 +52,13 @@ final class DocumentAction
             $this->assignCareer($templateProcessor, $application->applicant);
             $this->assignEducation($templateProcessor, $application->applicant);
 
-            $templateProcessor->saveAs($this->documentName);
-
-            $pdfName = $this->makePDF($this->documentName);
+            $templateProcessor->saveAs($outputPath);
+            //$pdfName = $this->makePDF($this->documentName);
 
             $response->getBody()->write(json_encode([
                 'result' => true,
                 'message' => 'Document created successfully',
-                'pdf' => $pdfName,
+                //'pdf' => $pdfName,
                 'docx' => $this->documentName
             ]));
 
@@ -91,22 +97,18 @@ final class DocumentAction
         if (empty($applicant->skills)) {
             return;
         }
-        $categories = array_unique(array_map(fn ($item) => $item->category, $applicant->skills));
-        $skillsByCategory = array();
-        foreach ($categories as $category) {
-            $skillsByCategory[$category] = array_filter($applicant->skills, fn ($item) => $item->category === $category);
-        }
+        $categoryGroupings = SkillModel::groupByCategories($applicant);
         $keys = array_keys($applicant->skills[0]->getDisplayJSON());
         $count = 0;
         $cat_replacements = array();
         $skill_replacements = array();
-        foreach ($skillsByCategory as $category => $skills) {
+        foreach ($categoryGroupings as $group) {
             $cat_replacements_loop = array();
             $skill_replacements_loop = array();
             foreach ($keys as $key) {
                 $cat_replacements_loop[$key] = '${' . $key . '_' . $count . '}';
             }
-            foreach ($skills as $skill) {
+            foreach ($group['skills'] as $skill) {
                 $data = $skill->getDisplayJSON();
                 foreach ($keys as $key) {
                     $data[$key . '_' . $count] = $data[$key];
@@ -114,7 +116,8 @@ final class DocumentAction
                 }
                 $skill_replacements_loop[] = $data;
             }
-            $cat_replacements_loop['skill_category'] = $category;
+            $cat_replacements_loop['skill_category'] = $group['category'];
+            $cat_replacements_loop['skill_sub_category'] = $group['subCategory'] ?? '';
             $cat_replacements[] = $cat_replacements_loop;
             $skill_replacements[] = $skill_replacements_loop;
             $count++;

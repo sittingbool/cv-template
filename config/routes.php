@@ -11,7 +11,8 @@ $i18n = [
 $_ENV['i18n'] = $i18n;
 
 return function (App $app) {
-    $app->options('/{routes:.+}', function ($request, $response, $args) {
+    // OPTIONS handler MUST be here, not in middleware.php
+    $app->options('/{routes:.+}', function ($request, $response) {
         return $response;
     });
 

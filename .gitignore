@@ -3,6 +3,7 @@ vendor/
 .env
 *.docx
 !template.docx
+!CV_template.docx
 *.pdf
 .php-cs-fixer.cache
 .DS_Store

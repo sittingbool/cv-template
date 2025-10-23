@@ -14,7 +14,9 @@
         "php-di/php-di": "^7.0",
         "phpoffice/phpword": "^1.2",
         "dompdf/dompdf": "^3.0",
-        "ext-intl": "*"
+        "ext-intl": "*",
+        "ext-zip": "*",
+        "tuupola/cors-middleware": "^1.5"
     },
     "require-dev": {
         "vimeo/psalm": "^5.24",
